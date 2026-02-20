@@ -16,9 +16,11 @@
         .chat-input-container { background-color: #111827; border: 1px solid #1e293b; border-radius: 50px; }
         .api-settings-btn { border: 1px solid #1e293b; border-radius: 50px; padding: 8px 20px; color: #3b82f6; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
         .api-settings-btn:hover { background: rgba(59, 130, 246, 0.1); }
+        .response-mode-btn.active { background-color: #3b82f6; color: white; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         .modal { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
+        .msg-selected { border: 2px solid #3b82f6 !important; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -30,27 +32,33 @@
                 <div class="bg-blue-600 p-2 rounded-lg text-white">
                     <i class="fas fa-brain"></i>
                 </div>
-                <h1 class="text-xl font-bold text-white tracking-tight">AI MIND PRO</h1>
+                <h1 class="text-xl font-bold text-white tracking-tight uppercase">AI MIND PRO</h1>
             </div>
             <button class="text-[10px] font-bold text-red-500 border border-red-500/30 px-3 py-1 rounded hover:bg-red-500/10 transition uppercase">LOGOUT</button>
         </div>
 
-        <!-- Section: API Settings Toggle (As per your second image) -->
+        <!-- Section: API Settings Toggle -->
         <div id="apiToggleBtn" class="api-settings-btn uppercase">
             <i class="fas fa-sliders-h"></i> API SETTINGS
         </div>
 
-        <!-- Hidden API Settings Panel -->
+        <!-- Hidden API Settings Panel with Free Model List -->
         <div id="apiSettingsPanel" class="hidden mb-6 p-4 card space-y-3">
             <div>
                 <label class="text-[10px] text-gray-400 block mb-1">OPENROUTER API KEY</label>
                 <input type="password" id="apiKeyInput" placeholder="sk-or-v1-..." class="input-dark w-full p-2 text-sm rounded outline-none focus:border-blue-500">
             </div>
             <div>
-                <label class="text-[10px] text-gray-400 block mb-1">MODEL ID</label>
-                <input type="text" id="modelIdInput" placeholder="google/gemini-2.0-flash-001" class="input-dark w-full p-2 text-sm rounded outline-none focus:border-blue-500">
+                <label class="text-[10px] text-gray-400 block mb-1">SELECT FREE MODEL</label>
+                <select id="modelSelect" class="input-dark w-full p-2 text-sm rounded outline-none focus:border-blue-500">
+                    <option value="google/gemini-2.0-flash-001">Gemini Flash 2.0 (Free)</option>
+                    <option value="google/gemini-2.0-flash-lite-preview-02-05:free">Gemini Flash Lite (Free)</option>
+                    <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (Free)</option>
+                    <option value="mistralai/mistral-7b-instruct:free">Mistral 7B (Free)</option>
+                    <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (Free)</option>
+                </select>
             </div>
-            <button id="saveConfig" class="w-full text-[11px] font-bold py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">SAVE CONFIG</button>
+            <button id="saveConfig" class="w-full text-[11px] font-bold py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition uppercase">Save Configuration</button>
         </div>
 
         <!-- Admin Management -->
@@ -59,54 +67,46 @@
                 <i class="fas fa-shield-alt"></i> ADMIN MANAGEMENT
             </p>
             <div class="card p-4">
-                <p class="text-[10px] text-gray-400 mb-2 uppercase">Create User</p>
                 <input type="text" placeholder="User ID" class="input-dark w-full p-2 text-sm rounded mb-2 outline-none">
                 <input type="password" placeholder="Password" class="input-dark w-full p-2 text-sm rounded mb-3 outline-none">
-                <button class="btn-primary w-full py-2 text-sm font-bold rounded shadow-lg shadow-blue-500/20">ADD USER</button>
+                <button class="btn-primary w-full py-2 text-sm font-bold rounded uppercase">Add User</button>
             </div>
         </div>
 
         <!-- Manage Users -->
         <div class="mb-6">
-            <p class="text-[10px] text-gray-400 mb-2 uppercase tracking-widest">Manage Users</p>
+            <p class="text-[10px] text-gray-400 mb-2 uppercase tracking-widest font-bold">Manage Users</p>
             <div class="space-y-2">
                 <div class="input-dark p-2 rounded text-sm flex justify-between items-center">
                     <span>admin</span>
                 </div>
                 <div class="input-dark p-2 rounded text-sm flex justify-between items-center">
-                    <span>user</span>
-                    <i class="fas fa-trash text-red-500 cursor-pointer text-xs"></i>
+                    <span>user_01</span>
+                    <i class="fas fa-trash text-red-500 cursor-pointer text-xs hover:text-red-400"></i>
                 </div>
             </div>
-        </div>
-
-        <!-- Upload Doc -->
-        <div class="mb-6">
-            <p class="text-[10px] text-gray-400 mb-2 uppercase">Upload New Doc</p>
-            <button class="w-full border border-blue-500/30 text-blue-400 py-2 rounded text-sm font-bold hover:bg-blue-500/10 transition uppercase">SELECT FILE</button>
         </div>
 
         <!-- Active Documents -->
         <div>
             <div class="flex justify-between items-center mb-2">
-                <p class="text-[10px] text-gray-400 uppercase">Active Documents</p>
-                <span class="bg-blue-600 text-[10px] text-white px-2 py-0.5 rounded-full">1 Selected</span>
+                <p class="text-[10px] text-gray-400 uppercase font-bold">Active Documents</p>
+                <span id="docCount" class="bg-blue-600 text-[10px] text-white px-2 py-0.5 rounded-full">1 Selected</span>
             </div>
             <div class="card p-3 flex flex-col gap-2" id="doc-list">
-                <!-- Document Item -->
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between group">
                     <div class="flex items-center gap-2 text-sm text-white font-medium">
                         <input type="checkbox" checked class="accent-blue-500">
                         <span>BSA2023.pdf</span>
                     </div>
                     <div class="flex gap-3 text-gray-500 text-xs">
-                        <i class="fas fa-cog cursor-pointer hover:text-blue-400 transition" title="Document Instructions" onclick="openDocInstructions()"></i>
-                        <i class="fas fa-trash cursor-pointer hover:text-red-500 transition" title="Delete" onclick="deleteDoc(this)"></i>
+                        <i class="fas fa-cog cursor-pointer hover:text-blue-400 transition" onclick="openDocInstructions()"></i>
+                        <i class="fas fa-trash cursor-pointer hover:text-red-500 transition" onclick="deleteDoc(this)"></i>
                     </div>
                 </div>
                 <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-800 text-[10px]">
                     <span class="text-gray-500 uppercase">Assign:</span>
-                    <select class="bg-transparent text-gray-300 outline-none">
+                    <select class="bg-transparent text-gray-300 outline-none cursor-pointer">
                         <option>All Users</option>
                     </select>
                 </div>
@@ -127,35 +127,35 @@
                     </div>
                 </div>
                 
-                <!-- Response Mode -->
+                <!-- Response Mode (Active Again) -->
                 <div class="flex gap-1 bg-gray-900 p-1 rounded-lg ml-6">
-                    <button class="text-[10px] px-3 py-1 rounded bg-blue-600 text-white font-bold transition">DOC</button>
-                    <button class="text-[10px] px-3 py-1 rounded text-gray-500 font-bold hover:text-white transition">WEB</button>
-                    <button class="text-[10px] px-3 py-1 rounded text-gray-500 font-bold hover:text-white transition">BOTH</button>
+                    <button class="response-mode-btn active text-[10px] px-3 py-1 rounded font-bold transition" onclick="setMode(this, 'DOC')">DOC</button>
+                    <button class="response-mode-btn text-[10px] px-3 py-1 rounded text-gray-500 font-bold hover:text-white transition" onclick="setMode(this, 'WEB')">WEB</button>
+                    <button class="response-mode-btn text-[10px] px-3 py-1 rounded text-gray-500 font-bold hover:text-white transition" onclick="setMode(this, 'BOTH')">BOTH</button>
                 </div>
 
                 <div class="flex gap-2 ml-4">
-                    <button class="bg-gray-800 text-[10px] font-bold px-3 py-1 rounded text-gray-300 hover:bg-red-900/20">DELETE</button>
+                    <button id="deleteChatBtn" class="bg-gray-800 text-[10px] font-bold px-3 py-1 rounded text-gray-300 hover:bg-red-900/40 transition uppercase">Delete Selected</button>
                     <div class="flex items-center gap-1 bg-gray-800 px-2 rounded">
                         <span class="text-[10px] text-gray-500 mr-2 uppercase">Export:</span>
-                        <button class="text-[10px] font-bold text-gray-300 px-1 hover:text-white">PDF</button>
-                        <button class="text-[10px] font-bold text-gray-300 px-1 hover:text-white">DOCX</button>
-                        <button class="text-[10px] font-bold text-gray-300 px-1 hover:text-white">TXT</button>
+                        <button class="text-[10px] font-bold text-gray-300 px-1 hover:text-white" onclick="exportChat('pdf')">PDF</button>
+                        <button class="text-[10px] font-bold text-gray-300 px-1 hover:text-white" onclick="exportChat('docx')">DOCX</button>
+                        <button class="text-[10px] font-bold text-gray-300 px-1 hover:text-white" onclick="exportChat('txt')">TXT</button>
                     </div>
                 </div>
             </div>
-            <button class="bg-gray-800/50 text-[10px] font-bold px-3 py-1 rounded text-gray-500 border border-gray-700 hover:text-white">TOGGLE ALL</button>
+            <button class="bg-gray-800/50 text-[10px] font-bold px-3 py-1 rounded text-gray-500 border border-gray-700 hover:text-white uppercase">Toggle All</button>
         </nav>
 
         <!-- Chat Display -->
         <div id="chatWindow" class="flex-1 overflow-y-auto p-8 flex flex-col gap-6">
-            <p class="text-center text-gray-600 italic text-sm mt-10">System: AI Mind Pro is ready. Select documents to start grounding.</p>
+            <p class="text-center text-gray-600 italic text-sm mt-10">System: AI Mind Pro is ready. Mode: <span id="currentModeDisplay">DOC</span>. Select documents to start grounding.</p>
         </div>
 
         <!-- Chat Input Area -->
         <div class="p-6">
             <div class="max-w-4xl mx-auto chat-input-container p-2 flex items-center gap-4 px-4 shadow-2xl relative">
-                <button id="micBtn" class="text-gray-500 hover:scale-110 transition duration-300">
+                <button id="micBtn" class="text-gray-500 hover:scale-110 transition duration-300" title="Voice Input">
                     <i class="fas fa-microphone text-lg"></i>
                 </button>
                 <input type="text" id="mainInput" placeholder="Apna sawal yahan likhein..." class="flex-1 bg-transparent border-none outline-none text-white text-sm">
@@ -179,74 +179,88 @@
     </div>
 
     <script>
-        // State
+        // --- Configuration & State ---
         let config = {
             apiKey: localStorage.getItem('or_key') || '',
-            modelId: localStorage.getItem('or_model') || 'google/gemini-2.0-flash-001'
+            modelId: localStorage.getItem('or_model') || 'google/gemini-2.0-flash-001',
+            mode: 'DOC'
         };
         let isRecording = false;
+        let selectedMessages = new Set();
 
-        // Elements
+        // --- DOM Elements ---
         const apiToggleBtn = document.getElementById('apiToggleBtn');
         const apiPanel = document.getElementById('apiSettingsPanel');
+        const modelSelect = document.getElementById('modelSelect');
         const micBtn = document.getElementById('micBtn');
         const mainInput = document.getElementById('mainInput');
         const chatWindow = document.getElementById('chatWindow');
         const sendBtn = document.getElementById('sendBtn');
+        const deleteChatBtn = document.getElementById('deleteChatBtn');
 
-        // Toggle API Panel
-        apiToggleBtn.onclick = () => {
-            apiPanel.classList.toggle('hidden');
-        };
+        // Initialize UI
+        document.getElementById('apiKeyInput').value = config.apiKey;
+        modelSelect.value = config.modelId;
 
-        // Mic Toggle Logic (Green for start, Red for stop)
-        micBtn.onclick = () => {
-            isRecording = !isRecording;
-            if(isRecording) {
-                micBtn.classList.remove('text-gray-500');
-                micBtn.classList.add('text-green-500');
-                appendMsg('System', 'Voice input listening...', 'text-green-500');
-            } else {
-                micBtn.classList.remove('text-green-500');
-                micBtn.classList.add('text-red-500');
-                setTimeout(() => micBtn.classList.replace('text-red-500', 'text-gray-500'), 1500);
-                appendMsg('System', 'Voice input stopped.', 'text-red-500');
-            }
-        };
+        // --- API & UI Functions ---
+        apiToggleBtn.onclick = () => apiPanel.classList.toggle('hidden');
 
-        // Document Actions
-        function openDocInstructions() {
-            document.getElementById('instrModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('instrModal').classList.add('hidden');
-        }
-
-        function deleteDoc(el) {
-            if(confirm("Are you sure you want to delete this document?")) {
-                el.closest('.card').parentElement.remove();
-            }
-        }
-
-        // Save API Config
         document.getElementById('saveConfig').onclick = () => {
             config.apiKey = document.getElementById('apiKeyInput').value.trim();
-            config.modelId = document.getElementById('modelIdInput').value.trim();
+            config.modelId = modelSelect.value;
             localStorage.setItem('or_key', config.apiKey);
             localStorage.setItem('or_model', config.modelId);
             apiPanel.classList.add('hidden');
-            appendMsg('System', 'Configuration Saved Successfully!', 'text-blue-400 font-bold');
+            appendMsg('System', `Model updated to: ${config.modelId}`, 'text-blue-400 font-bold');
         };
 
-        // Chat logic
+        function setMode(btn, mode) {
+            document.querySelectorAll('.response-mode-btn').forEach(b => {
+                b.classList.remove('active', 'bg-blue-600', 'text-white');
+                b.classList.add('text-gray-500');
+            });
+            btn.classList.add('active', 'bg-blue-600', 'text-white');
+            btn.classList.remove('text-gray-500');
+            config.mode = mode;
+            document.getElementById('currentModeDisplay').innerText = mode;
+        }
+
+        micBtn.onclick = () => {
+            isRecording = !isRecording;
+            if(isRecording) {
+                micBtn.classList.replace('text-gray-500', 'text-green-500');
+                appendMsg('System', 'Listening...', 'text-green-500');
+            } else {
+                micBtn.classList.replace('text-green-500', 'text-red-500');
+                setTimeout(() => micBtn.classList.replace('text-red-500', 'text-gray-500'), 1000);
+            }
+        };
+
         function appendMsg(sender, text, colorClass = 'text-gray-300') {
+            const msgId = 'msg-' + Date.now();
             const div = document.createElement('div');
-            div.className = `flex flex-col ${sender === 'User' ? 'items-end' : 'items-start'}`;
+            div.id = msgId;
+            div.className = `group flex flex-col ${sender === 'User' ? 'items-end' : 'items-start'} cursor-pointer transition-all`;
+            
+            // Toggle selection for deletion
+            div.onclick = () => {
+                if(div.classList.contains('msg-selected')) {
+                    div.classList.remove('msg-selected');
+                    selectedMessages.delete(msgId);
+                } else {
+                    div.classList.add('msg-selected');
+                    selectedMessages.add(msgId);
+                }
+            };
+
+            const isAI = sender === 'AI';
             const content = `
-                <div class="${sender === 'User' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-200'} px-4 py-2 rounded-2xl max-w-[80%] text-sm shadow-md">
-                    <p class="text-[10px] mb-1 font-bold opacity-50 uppercase tracking-widest">${sender}</p>
-                    <div class="${colorClass}">${text}</div>
+                <div class="${sender === 'User' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-200'} px-4 py-2 rounded-2xl max-w-[85%] text-sm shadow-md border border-transparent">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-[9px] font-bold opacity-50 uppercase tracking-widest">${sender}</p>
+                        ${isAI ? `<i class="fas fa-volume-up ml-3 cursor-pointer hover:text-blue-400" onclick="readAloud('${text.replace(/'/g, "\\'")}'); event.stopPropagation();"></i>` : ''}
+                    </div>
+                    <div class="${colorClass} whitespace-pre-wrap">${text}</div>
                 </div>
             `;
             div.innerHTML = content;
@@ -254,12 +268,12 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
+        // --- Core Chat Logic ---
         async function handleChat() {
             const prompt = mainInput.value.trim();
             if(!prompt) return;
-
             if(!config.apiKey) {
-                appendMsg('System', 'Please set OpenRouter API key in Settings.', 'text-red-400');
+                appendMsg('System', 'Error: API Key missing hai. Settings check karein.', 'text-red-400');
                 apiPanel.classList.remove('hidden');
                 return;
             }
@@ -269,7 +283,7 @@
 
             const loader = document.createElement('div');
             loader.className = 'text-xs text-blue-400 italic animate-pulse px-4';
-            loader.innerText = 'AI is thinking...';
+            loader.innerText = `AI Thinking (Mode: ${config.mode})...`;
             chatWindow.appendChild(loader);
 
             try {
@@ -281,7 +295,7 @@
                     },
                     body: JSON.stringify({
                         "model": config.modelId,
-                        "messages": [{ "role": "user", "content": prompt }]
+                        "messages": [{ "role": "user", "content": `[MODE: ${config.mode}] ${prompt}` }]
                     })
                 });
                 const data = await response.json();
@@ -293,6 +307,33 @@
                 appendMsg('Error', err.message, 'text-red-500');
             }
         }
+
+        // --- Other Utilities ---
+        deleteChatBtn.onclick = () => {
+            if(selectedMessages.size === 0) {
+                appendMsg('System', 'Pehle chat select karein delete karne ke liye.', 'text-yellow-500');
+                return;
+            }
+            selectedMessages.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.remove();
+            });
+            selectedMessages.clear();
+        };
+
+        function readAloud(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'hi-IN'; // Default to Hindi
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function exportChat(type) {
+            appendMsg('System', `Exporting as ${type.toUpperCase()}... (Simulated)`, 'text-blue-400');
+        }
+
+        function openDocInstructions() { document.getElementById('instrModal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('instrModal').classList.add('hidden'); }
+        function deleteDoc(el) { if(confirm("Delete doc?")) el.closest('.group').remove(); }
 
         sendBtn.onclick = handleChat;
         mainInput.onkeypress = (e) => { if(e.key === 'Enter') handleChat(); };
