@@ -20,12 +20,12 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         .modal { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
-        .msg-selected { border: 2px solid #3b82f6 !important; }
+        .msg-selected { border: 2px solid #3b82f6 !important; background: rgba(59, 130, 246, 0.05); }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <!-- Left Sidebar -->
+    <!-- Sidebar -->
     <aside class="sidebar flex flex-col p-4 overflow-y-auto">
         <div class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-2">
@@ -37,25 +37,25 @@
             <button class="text-[10px] font-bold text-red-500 border border-red-500/30 px-3 py-1 rounded hover:bg-red-500/10 transition uppercase">LOGOUT</button>
         </div>
 
-        <!-- Section: API Settings Toggle -->
+        <!-- API Settings Toggle -->
         <div id="apiToggleBtn" class="api-settings-btn uppercase">
             <i class="fas fa-sliders-h"></i> API SETTINGS
         </div>
 
-        <!-- Hidden API Settings Panel with Free Model List -->
+        <!-- API Panel (Updated with Multilingual Free Models) -->
         <div id="apiSettingsPanel" class="hidden mb-6 p-4 card space-y-3">
             <div>
                 <label class="text-[10px] text-gray-400 block mb-1">OPENROUTER API KEY</label>
                 <input type="password" id="apiKeyInput" placeholder="sk-or-v1-..." class="input-dark w-full p-2 text-sm rounded outline-none focus:border-blue-500">
             </div>
             <div>
-                <label class="text-[10px] text-gray-400 block mb-1">SELECT FREE MODEL</label>
+                <label class="text-[10px] text-gray-400 block mb-1">SELECT MULTILINGUAL MODEL</label>
                 <select id="modelSelect" class="input-dark w-full p-2 text-sm rounded outline-none focus:border-blue-500">
-                    <option value="google/gemini-2.0-flash-001">Gemini Flash 2.0 (Free)</option>
-                    <option value="google/gemini-2.0-flash-lite-preview-02-05:free">Gemini Flash Lite (Free)</option>
-                    <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (Free)</option>
-                    <option value="mistralai/mistral-7b-instruct:free">Mistral 7B (Free)</option>
-                    <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (Free)</option>
+                    <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (GUJ, HIN, ENG)</option>
+                    <option value="google/gemini-2.0-flash-lite-preview-02-05:free">Gemini Flash Lite (GUJ, HIN, ENG)</option>
+                    <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (HIN, ENG)</option>
+                    <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (GUJ, HIN, ENG)</option>
+                    <option value="deepseek/deepseek-chat:free">DeepSeek V3 (HIN, ENG)</option>
                 </select>
             </div>
             <button id="saveConfig" class="w-full text-[11px] font-bold py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition uppercase">Save Configuration</button>
@@ -70,20 +70,6 @@
                 <input type="text" placeholder="User ID" class="input-dark w-full p-2 text-sm rounded mb-2 outline-none">
                 <input type="password" placeholder="Password" class="input-dark w-full p-2 text-sm rounded mb-3 outline-none">
                 <button class="btn-primary w-full py-2 text-sm font-bold rounded uppercase">Add User</button>
-            </div>
-        </div>
-
-        <!-- Manage Users -->
-        <div class="mb-6">
-            <p class="text-[10px] text-gray-400 mb-2 uppercase tracking-widest font-bold">Manage Users</p>
-            <div class="space-y-2">
-                <div class="input-dark p-2 rounded text-sm flex justify-between items-center">
-                    <span>admin</span>
-                </div>
-                <div class="input-dark p-2 rounded text-sm flex justify-between items-center">
-                    <span>user_01</span>
-                    <i class="fas fa-trash text-red-500 cursor-pointer text-xs hover:text-red-400"></i>
-                </div>
             </div>
         </div>
 
@@ -104,19 +90,12 @@
                         <i class="fas fa-trash cursor-pointer hover:text-red-500 transition" onclick="deleteDoc(this)"></i>
                     </div>
                 </div>
-                <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-800 text-[10px]">
-                    <span class="text-gray-500 uppercase">Assign:</span>
-                    <select class="bg-transparent text-gray-300 outline-none cursor-pointer">
-                        <option>All Users</option>
-                    </select>
-                </div>
             </div>
         </div>
     </aside>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col">
-        <!-- Top Nav -->
         <nav class="h-16 flex items-center justify-between px-6 border-b border-gray-800">
             <div class="flex items-center gap-4">
                 <div class="flex flex-col">
@@ -127,7 +106,7 @@
                     </div>
                 </div>
                 
-                <!-- Response Mode (Active Again) -->
+                <!-- Response Modes -->
                 <div class="flex gap-1 bg-gray-900 p-1 rounded-lg ml-6">
                     <button class="response-mode-btn active text-[10px] px-3 py-1 rounded font-bold transition" onclick="setMode(this, 'DOC')">DOC</button>
                     <button class="response-mode-btn text-[10px] px-3 py-1 rounded text-gray-500 font-bold hover:text-white transition" onclick="setMode(this, 'WEB')">WEB</button>
@@ -144,12 +123,11 @@
                     </div>
                 </div>
             </div>
-            <button class="bg-gray-800/50 text-[10px] font-bold px-3 py-1 rounded text-gray-500 border border-gray-700 hover:text-white uppercase">Toggle All</button>
         </nav>
 
-        <!-- Chat Display -->
+        <!-- Chat Window -->
         <div id="chatWindow" class="flex-1 overflow-y-auto p-8 flex flex-col gap-6">
-            <p class="text-center text-gray-600 italic text-sm mt-10">System: AI Mind Pro is ready. Mode: <span id="currentModeDisplay">DOC</span>. Select documents to start grounding.</p>
+            <p class="text-center text-gray-600 italic text-sm mt-10">System: AI Mind Pro is ready. Mode: <span id="currentModeDisplay">DOC</span>. (Supports GUJ, HIN, ENG)</p>
         </div>
 
         <!-- Chat Input Area -->
@@ -158,7 +136,7 @@
                 <button id="micBtn" class="text-gray-500 hover:scale-110 transition duration-300" title="Voice Input">
                     <i class="fas fa-microphone text-lg"></i>
                 </button>
-                <input type="text" id="mainInput" placeholder="Apna sawal yahan likhein..." class="flex-1 bg-transparent border-none outline-none text-white text-sm">
+                <input type="text" id="mainInput" placeholder="તમારો પ્રશ્ન અહીં લખો (ગુજરાતી, હિન્દી અથવા અંગ્રેજી)..." class="flex-1 bg-transparent border-none outline-none text-white text-sm">
                 <button id="sendBtn" class="bg-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-500/40 hover:scale-105 active:scale-95 transition">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -166,20 +144,19 @@
         </div>
     </main>
 
-    <!-- Modal for Document Instructions -->
+    <!-- Modal for Instructions -->
     <div id="instrModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50">
         <div class="card w-96 p-6 shadow-2xl border-blue-500/30">
             <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-widest">Document Instructions</h3>
-            <textarea class="input-dark w-full h-32 rounded p-3 text-sm mb-4 outline-none focus:border-blue-500" placeholder="Enter specific instructions for this document..."></textarea>
+            <textarea id="docInstructionsText" class="input-dark w-full h-32 rounded p-3 text-sm mb-4 outline-none focus:border-blue-500" placeholder="Instructions for this document..."></textarea>
             <div class="flex justify-end gap-2">
                 <button onclick="closeModal()" class="text-[11px] px-4 py-2 text-gray-500 uppercase font-bold">Cancel</button>
-                <button onclick="closeModal()" class="text-[11px] px-4 py-2 bg-blue-600 text-white rounded uppercase font-bold shadow-lg shadow-blue-500/20">Save</button>
+                <button onclick="closeModal()" class="text-[11px] px-4 py-2 bg-blue-600 text-white rounded uppercase font-bold">Save</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- Configuration & State ---
         let config = {
             apiKey: localStorage.getItem('or_key') || '',
             modelId: localStorage.getItem('or_model') || 'google/gemini-2.0-flash-001',
@@ -188,30 +165,26 @@
         let isRecording = false;
         let selectedMessages = new Set();
 
-        // --- DOM Elements ---
         const apiToggleBtn = document.getElementById('apiToggleBtn');
         const apiPanel = document.getElementById('apiSettingsPanel');
-        const modelSelect = document.getElementById('modelSelect');
         const micBtn = document.getElementById('micBtn');
         const mainInput = document.getElementById('mainInput');
         const chatWindow = document.getElementById('chatWindow');
         const sendBtn = document.getElementById('sendBtn');
         const deleteChatBtn = document.getElementById('deleteChatBtn');
 
-        // Initialize UI
         document.getElementById('apiKeyInput').value = config.apiKey;
-        modelSelect.value = config.modelId;
+        document.getElementById('modelSelect').value = config.modelId;
 
-        // --- API & UI Functions ---
         apiToggleBtn.onclick = () => apiPanel.classList.toggle('hidden');
 
         document.getElementById('saveConfig').onclick = () => {
             config.apiKey = document.getElementById('apiKeyInput').value.trim();
-            config.modelId = modelSelect.value;
+            config.modelId = document.getElementById('modelSelect').value;
             localStorage.setItem('or_key', config.apiKey);
             localStorage.setItem('or_model', config.modelId);
             apiPanel.classList.add('hidden');
-            appendMsg('System', `Model updated to: ${config.modelId}`, 'text-blue-400 font-bold');
+            appendMsg('System', `કોન્ફિગરેશન સેવ થયું: ${config.modelId}`, 'text-blue-400');
         };
 
         function setMode(btn, mode) {
@@ -227,22 +200,16 @@
 
         micBtn.onclick = () => {
             isRecording = !isRecording;
-            if(isRecording) {
-                micBtn.classList.replace('text-gray-500', 'text-green-500');
-                appendMsg('System', 'Listening...', 'text-green-500');
-            } else {
-                micBtn.classList.replace('text-green-500', 'text-red-500');
-                setTimeout(() => micBtn.classList.replace('text-red-500', 'text-gray-500'), 1000);
-            }
+            micBtn.style.color = isRecording ? '#22c55e' : '#94a3b8';
+            if(isRecording) appendMsg('System', 'Listening... (તમે બોલી શકો છો)', 'text-green-500');
         };
 
         function appendMsg(sender, text, colorClass = 'text-gray-300') {
             const msgId = 'msg-' + Date.now();
             const div = document.createElement('div');
             div.id = msgId;
-            div.className = `group flex flex-col ${sender === 'User' ? 'items-end' : 'items-start'} cursor-pointer transition-all`;
+            div.className = `flex flex-col ${sender === 'User' ? 'items-end' : 'items-start'} cursor-pointer mb-4`;
             
-            // Toggle selection for deletion
             div.onclick = () => {
                 if(div.classList.contains('msg-selected')) {
                     div.classList.remove('msg-selected');
@@ -254,26 +221,24 @@
             };
 
             const isAI = sender === 'AI';
-            const content = `
-                <div class="${sender === 'User' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-200'} px-4 py-2 rounded-2xl max-w-[85%] text-sm shadow-md border border-transparent">
+            div.innerHTML = `
+                <div class="${sender === 'User' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-200'} px-4 py-2 rounded-2xl max-w-[85%] text-sm shadow-md">
                     <div class="flex justify-between items-center mb-1">
-                        <p class="text-[9px] font-bold opacity-50 uppercase tracking-widest">${sender}</p>
+                        <p class="text-[9px] font-bold opacity-50 uppercase">${sender}</p>
                         ${isAI ? `<i class="fas fa-volume-up ml-3 cursor-pointer hover:text-blue-400" onclick="readAloud('${text.replace(/'/g, "\\'")}'); event.stopPropagation();"></i>` : ''}
                     </div>
                     <div class="${colorClass} whitespace-pre-wrap">${text}</div>
                 </div>
             `;
-            div.innerHTML = content;
             chatWindow.appendChild(div);
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        // --- Core Chat Logic ---
         async function handleChat() {
             const prompt = mainInput.value.trim();
             if(!prompt) return;
             if(!config.apiKey) {
-                appendMsg('System', 'Error: API Key missing hai. Settings check karein.', 'text-red-400');
+                appendMsg('System', 'API Key બાકી છે!', 'text-red-400');
                 apiPanel.classList.remove('hidden');
                 return;
             }
@@ -283,7 +248,7 @@
 
             const loader = document.createElement('div');
             loader.className = 'text-xs text-blue-400 italic animate-pulse px-4';
-            loader.innerText = `AI Thinking (Mode: ${config.mode})...`;
+            loader.innerText = `Thinking (${config.mode})...`;
             chatWindow.appendChild(loader);
 
             try {
@@ -295,7 +260,10 @@
                     },
                     body: JSON.stringify({
                         "model": config.modelId,
-                        "messages": [{ "role": "user", "content": `[MODE: ${config.mode}] ${prompt}` }]
+                        "messages": [{ 
+                            "role": "user", 
+                            "content": `You are an assistant. Answer in the same language as the user query (Gujarati, Hindi, or English). [MODE: ${config.mode}] Query: ${prompt}` 
+                        }]
                     })
                 });
                 const data = await response.json();
@@ -304,36 +272,28 @@
                 appendMsg('AI', data.choices[0].message.content);
             } catch (err) {
                 if(loader.parentNode) chatWindow.removeChild(loader);
-                appendMsg('Error', err.message, 'text-red-500');
+                appendMsg('Error', 'માફ કરશો, નેટવર્ક અથવા API માં સમસ્યા છે: ' + err.message, 'text-red-500');
             }
         }
 
-        // --- Other Utilities ---
         deleteChatBtn.onclick = () => {
-            if(selectedMessages.size === 0) {
-                appendMsg('System', 'Pehle chat select karein delete karne ke liye.', 'text-yellow-500');
-                return;
-            }
-            selectedMessages.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.remove();
-            });
+            selectedMessages.forEach(id => document.getElementById(id).remove());
             selectedMessages.clear();
         };
 
         function readAloud(text) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'hi-IN'; // Default to Hindi
-            window.speechSynthesis.speak(utterance);
+            const u = new SpeechSynthesisUtterance(text);
+            // Detecting simple patterns to set voice
+            if(/[અ-હ]/.test(text)) u.lang = 'gu-IN';
+            else if(/[अ-ह]/.test(text)) u.lang = 'hi-IN';
+            else u.lang = 'en-US';
+            window.speechSynthesis.speak(u);
         }
 
-        function exportChat(type) {
-            appendMsg('System', `Exporting as ${type.toUpperCase()}... (Simulated)`, 'text-blue-400');
-        }
-
+        function exportChat(type) { alert('Exporting as ' + type); }
         function openDocInstructions() { document.getElementById('instrModal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('instrModal').classList.add('hidden'); }
-        function deleteDoc(el) { if(confirm("Delete doc?")) el.closest('.group').remove(); }
+        function deleteDoc(el) { el.closest('.group').remove(); }
 
         sendBtn.onclick = handleChat;
         mainInput.onkeypress = (e) => { if(e.key === 'Enter') handleChat(); };
