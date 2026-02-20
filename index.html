@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="gu">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI MIND PRO - Advanced Admin Panel</title>
+    <title>AI MIND PRO - Multilingual Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background-color: #0b1120; color: #94a3b8; font-family: sans-serif; }
@@ -12,15 +13,10 @@
         .card { background-color: #111827; border: 1px solid #1e293b; border-radius: 12px; }
         .input-dark { background-color: #020617; border: 1px solid #1e293b; color: #f8fafc; }
         .btn-primary { background-color: #3b82f6; color: white; transition: all 0.3s; }
-        .btn-primary:hover { background-color: #2563eb; }
-        .chat-input-container { background-color: #111827; border: 1px solid #1e293b; border-radius: 50px; }
-        .api-settings-btn { border: 1px solid #1e293b; border-radius: 50px; padding: 8px 20px; color: #3b82f6; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
-        .api-settings-btn:hover { background: rgba(59, 130, 246, 0.1); }
-        .response-mode-btn.active { background-color: #3b82f6; color: white; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-        .modal { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
+        .response-mode-btn.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
         .msg-selected { border: 2px solid #3b82f6 !important; background: rgba(59, 130, 246, 0.05); }
+        .loader { border-top-color: #3498db; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -29,67 +25,61 @@
     <aside class="sidebar flex flex-col p-4 overflow-y-auto">
         <div class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-2">
-                <div class="bg-blue-600 p-2 rounded-lg text-white">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <h1 class="text-xl font-bold text-white tracking-tight uppercase">AI MIND PRO</h1>
+                <div class="bg-blue-600 p-2 rounded-lg text-white"><i class="fas fa-brain"></i></div>
+                <h1 class="text-xl font-bold text-white tracking-tight">AI MIND PRO</h1>
             </div>
-            <button class="text-[10px] font-bold text-red-500 border border-red-500/30 px-3 py-1 rounded hover:bg-red-500/10 transition uppercase">LOGOUT</button>
+            <button class="text-[10px] font-bold text-red-500 border border-red-500/30 px-3 py-1 rounded">LOGOUT</button>
         </div>
 
         <!-- API Settings Toggle -->
-        <div id="apiToggleBtn" class="api-settings-btn uppercase">
-            <i class="fas fa-sliders-h"></i> API SETTINGS
+        <div id="apiToggleBtn" class="border border-gray-700 rounded-full py-2 px-4 mb-4 text-center cursor-pointer hover:bg-gray-800 text-blue-400 font-bold text-xs uppercase">
+            <i class="fas fa-key mr-2"></i> API Settings
         </div>
 
-        <!-- API Panel (Updated with Multilingual Free Models) -->
         <div id="apiSettingsPanel" class="hidden mb-6 p-4 card space-y-3">
             <div>
-                <label class="text-[10px] text-gray-400 block mb-1">OPENROUTER API KEY</label>
-                <input type="password" id="apiKeyInput" placeholder="sk-or-v1-..." class="input-dark w-full p-2 text-sm rounded outline-none focus:border-blue-500">
+                <label class="text-[10px] text-gray-400 block mb-1 uppercase">OpenRouter Key</label>
+                <input type="password" id="apiKeyInput" class="input-dark w-full p-2 text-sm rounded outline-none">
             </div>
             <div>
-                <label class="text-[10px] text-gray-400 block mb-1">SELECT MULTILINGUAL MODEL</label>
-                <select id="modelSelect" class="input-dark w-full p-2 text-sm rounded outline-none focus:border-blue-500">
-                    <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (GUJ, HIN, ENG)</option>
-                    <option value="google/gemini-2.0-flash-lite-preview-02-05:free">Gemini Flash Lite (GUJ, HIN, ENG)</option>
-                    <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (HIN, ENG)</option>
-                    <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (GUJ, HIN, ENG)</option>
-                    <option value="deepseek/deepseek-chat:free">DeepSeek V3 (HIN, ENG)</option>
+                <label class="text-[10px] text-gray-400 block mb-1 uppercase">Model Selection</label>
+                <select id="modelSelect" class="input-dark w-full p-2 text-sm rounded outline-none">
+                    <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (Fastest)</option>
+                    <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (Free)</option>
                 </select>
             </div>
-            <button id="saveConfig" class="w-full text-[11px] font-bold py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition uppercase">Save Configuration</button>
+            <button id="saveConfig" class="w-full text-xs font-bold py-2 bg-blue-600 text-white rounded uppercase">Save Settings</button>
         </div>
 
-        <!-- Admin Management -->
+        <!-- Admin Management (Newly Added) -->
         <div class="mb-6">
             <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                <i class="fas fa-shield-alt"></i> ADMIN MANAGEMENT
+                <i class="fas fa-user-shield"></i> User Management
             </p>
-            <div class="card p-4">
-                <input type="text" placeholder="User ID" class="input-dark w-full p-2 text-sm rounded mb-2 outline-none">
-                <input type="password" placeholder="Password" class="input-dark w-full p-2 text-sm rounded mb-3 outline-none">
-                <button class="btn-primary w-full py-2 text-sm font-bold rounded uppercase">Add User</button>
+            <div class="card p-3 space-y-2">
+                <input type="text" id="adminUserId" placeholder="Admin ID" class="input-dark w-full p-2 text-[11px] rounded outline-none">
+                <input type="password" id="adminUserPass" placeholder="Password" class="input-dark w-full p-2 text-[11px] rounded outline-none">
+                <button class="w-full py-1.5 bg-gray-800 text-gray-300 text-[10px] font-bold rounded hover:bg-gray-700 uppercase">Update Auth</button>
             </div>
         </div>
 
-        <!-- Active Documents -->
-        <div>
-            <div class="flex justify-between items-center mb-2">
-                <p class="text-[10px] text-gray-400 uppercase font-bold">Active Documents</p>
-                <span id="docCount" class="bg-blue-600 text-[10px] text-white px-2 py-0.5 rounded-full">1 Selected</span>
+        <!-- Add Document Section -->
+        <div class="mb-6">
+            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Add & Assign Documents</p>
+            <div class="card p-4 border-dashed border-gray-700 flex flex-col items-center">
+                <input type="file" id="pdfUpload" accept=".pdf" class="hidden">
+                <label for="pdfUpload" class="cursor-pointer text-center">
+                    <i class="fas fa-file-pdf text-3xl text-red-500 mb-2"></i>
+                    <p class="text-[10px] text-gray-400">PDF Upload & Read</p>
+                </label>
             </div>
-            <div class="card p-3 flex flex-col gap-2" id="doc-list">
-                <div class="flex items-center justify-between group">
-                    <div class="flex items-center gap-2 text-sm text-white font-medium">
-                        <input type="checkbox" checked class="accent-blue-500">
-                        <span>BSA2023.pdf</span>
-                    </div>
-                    <div class="flex gap-3 text-gray-500 text-xs">
-                        <i class="fas fa-cog cursor-pointer hover:text-blue-400 transition" onclick="openDocInstructions()"></i>
-                        <i class="fas fa-trash cursor-pointer hover:text-red-500 transition" onclick="deleteDoc(this)"></i>
-                    </div>
-                </div>
+        </div>
+
+        <!-- Active Documents List with Assign Checkbox -->
+        <div>
+            <p class="text-[10px] text-gray-400 uppercase font-bold mb-2">Active Documents</p>
+            <div class="card p-3 space-y-2" id="docList">
+                <p class="text-[10px] text-gray-600 text-center italic">No documents uploaded</p>
             </div>
         </div>
     </aside>
@@ -99,204 +89,215 @@
         <nav class="h-16 flex items-center justify-between px-6 border-b border-gray-800">
             <div class="flex items-center gap-4">
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-gray-500 uppercase tracking-widest">Active User</span>
+                    <span class="text-[10px] text-gray-500 uppercase">Status</span>
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                        <span class="text-sm font-bold text-white uppercase tracking-widest">ADMIN</span>
+                        <span id="activeUserDisplay" class="text-sm font-bold text-white uppercase tracking-wider">ADMIN</span>
                     </div>
                 </div>
                 
                 <!-- Response Modes -->
                 <div class="flex gap-1 bg-gray-900 p-1 rounded-lg ml-6">
-                    <button class="response-mode-btn active text-[10px] px-3 py-1 rounded font-bold transition" onclick="setMode(this, 'DOC')">DOC</button>
-                    <button class="response-mode-btn text-[10px] px-3 py-1 rounded text-gray-500 font-bold hover:text-white transition" onclick="setMode(this, 'WEB')">WEB</button>
-                    <button class="response-mode-btn text-[10px] px-3 py-1 rounded text-gray-500 font-bold hover:text-white transition" onclick="setMode(this, 'BOTH')">BOTH</button>
+                    <button class="response-mode-btn active text-[10px] px-4 py-1.5 rounded font-bold transition uppercase" onclick="setMode(this, 'DOC')">DOC</button>
+                    <button class="response-mode-btn text-[10px] px-4 py-1.5 rounded text-gray-500 font-bold hover:text-white transition uppercase" onclick="setMode(this, 'WEB')">WEB</button>
+                    <button class="response-mode-btn text-[10px] px-4 py-1.5 rounded text-gray-500 font-bold hover:text-white transition uppercase" onclick="setMode(this, 'BOTH')">BOTH</button>
                 </div>
 
-                <div class="flex gap-2 ml-4">
-                    <button id="deleteChatBtn" class="bg-gray-800 text-[10px] font-bold px-3 py-1 rounded text-gray-300 hover:bg-red-900/40 transition uppercase">Delete Selected</button>
-                    <div class="flex items-center gap-1 bg-gray-800 px-2 rounded">
-                        <span class="text-[10px] text-gray-500 mr-2 uppercase">Export:</span>
-                        <button class="text-[10px] font-bold text-gray-300 px-1 hover:text-white" onclick="exportChat('pdf')">PDF</button>
-                        <button class="text-[10px] font-bold text-gray-300 px-1 hover:text-white" onclick="exportChat('docx')">DOCX</button>
-                        <button class="text-[10px] font-bold text-gray-300 px-1 hover:text-white" onclick="exportChat('txt')">TXT</button>
-                    </div>
-                </div>
+                <button id="deleteSelected" class="ml-4 bg-red-900/10 text-red-500 border border-red-500/20 text-[10px] font-bold px-3 py-1.5 rounded uppercase hover:bg-red-500 hover:text-white transition">Delete Chat</button>
             </div>
         </nav>
 
-        <!-- Chat Window -->
+        <!-- Chat Area -->
         <div id="chatWindow" class="flex-1 overflow-y-auto p-8 flex flex-col gap-6">
-            <p class="text-center text-gray-600 italic text-sm mt-10">System: AI Mind Pro is ready. Mode: <span id="currentModeDisplay">DOC</span>. (Supports GUJ, HIN, ENG)</p>
+            <div class="text-center p-10 opacity-50">
+                <i class="fas fa-microchip text-4xl mb-4"></i>
+                <p class="text-sm">AI Mind Pro Ready. Please upload a PDF and set Mode.</p>
+            </div>
         </div>
 
-        <!-- Chat Input Area -->
+        <!-- Input Section -->
         <div class="p-6">
-            <div class="max-w-4xl mx-auto chat-input-container p-2 flex items-center gap-4 px-4 shadow-2xl relative">
-                <button id="micBtn" class="text-gray-500 hover:scale-110 transition duration-300" title="Voice Input">
-                    <i class="fas fa-microphone text-lg"></i>
+            <div class="max-w-4xl mx-auto chat-input-container p-2 flex items-center gap-4 px-4 shadow-2xl bg-gray-900/50">
+                <button id="voiceInputBtn" class="text-gray-500 hover:text-blue-500 transition text-lg px-2">
+                    <i class="fas fa-microphone"></i>
                 </button>
-                <input type="text" id="mainInput" placeholder="તમારો પ્રશ્ન અહીં લખો (ગુજરાતી, હિન્દી અથવા અંગ્રેજી)..." class="flex-1 bg-transparent border-none outline-none text-white text-sm">
-                <button id="sendBtn" class="bg-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-500/40 hover:scale-105 active:scale-95 transition">
+                <input type="text" id="mainInput" placeholder="તમારો સવાલ અહીં લખો..." class="flex-1 bg-transparent border-none outline-none text-white text-sm py-2">
+                <button id="sendBtn" class="bg-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-white hover:bg-blue-500 transition shadow-lg">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
         </div>
     </main>
 
-    <!-- Modal for Instructions -->
-    <div id="instrModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50">
-        <div class="card w-96 p-6 shadow-2xl border-blue-500/30">
-            <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-widest">Document Instructions</h3>
-            <textarea id="docInstructionsText" class="input-dark w-full h-32 rounded p-3 text-sm mb-4 outline-none focus:border-blue-500" placeholder="Instructions for this document..."></textarea>
-            <div class="flex justify-end gap-2">
-                <button onclick="closeModal()" class="text-[11px] px-4 py-2 text-gray-500 uppercase font-bold">Cancel</button>
-                <button onclick="closeModal()" class="text-[11px] px-4 py-2 bg-blue-600 text-white rounded uppercase font-bold">Save</button>
-            </div>
-        </div>
-    </div>
-
     <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
         let config = {
             apiKey: localStorage.getItem('or_key') || '',
             modelId: localStorage.getItem('or_model') || 'google/gemini-2.0-flash-001',
             mode: 'DOC'
         };
-        let isRecording = false;
+
+        let uploadedDocs = []; 
         let selectedMessages = new Set();
+        let recognition;
 
-        const apiToggleBtn = document.getElementById('apiToggleBtn');
-        const apiPanel = document.getElementById('apiSettingsPanel');
-        const micBtn = document.getElementById('micBtn');
-        const mainInput = document.getElementById('mainInput');
-        const chatWindow = document.getElementById('chatWindow');
-        const sendBtn = document.getElementById('sendBtn');
-        const deleteChatBtn = document.getElementById('deleteChatBtn');
+        // --- PDF Processing ---
+        document.getElementById('pdfUpload').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        document.getElementById('apiKeyInput').value = config.apiKey;
-        document.getElementById('modelSelect').value = config.modelId;
+            const reader = new FileReader();
+            reader.onload = async function() {
+                try {
+                    const typedarray = new Uint8Array(this.result);
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    let fullText = '';
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+                    }
+                    uploadedDocs.push({ name: file.name, text: fullText, assigned: true });
+                    updateDocUI();
+                } catch (err) {
+                    alert("PDF Read Error: " + err.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
 
-        apiToggleBtn.onclick = () => apiPanel.classList.toggle('hidden');
+        function updateDocUI() {
+            const list = document.getElementById('docList');
+            list.innerHTML = uploadedDocs.map((doc, idx) => `
+                <div class="flex justify-between items-center text-[11px] text-white bg-gray-800/50 p-2 rounded border border-gray-700">
+                    <div class="flex items-center gap-2 truncate">
+                        <input type="checkbox" ${doc.assigned ? 'checked' : ''} onclick="toggleAssign(${idx})" class="accent-blue-500">
+                        <span class="truncate w-32"><i class="fas fa-file-pdf text-red-400 mr-1"></i>${doc.name}</span>
+                    </div>
+                    <i class="fas fa-times text-gray-500 hover:text-red-500 cursor-pointer p-1" onclick="removeDoc(${idx})"></i>
+                </div>
+            `).join('') || '<p class="text-[10px] text-gray-600 text-center italic">No documents uploaded</p>';
+        }
 
+        function toggleAssign(idx) { uploadedDocs[idx].assigned = !uploadedDocs[idx].assigned; }
+        function removeDoc(idx) { uploadedDocs.splice(idx, 1); updateDocUI(); }
+
+        // --- Voice Logic ---
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = 'gu-IN';
+            recognition.onstart = () => document.getElementById('voiceInputBtn').classList.add('text-green-500');
+            recognition.onend = () => document.getElementById('voiceInputBtn').classList.remove('text-green-500');
+            recognition.onresult = (e) => { document.getElementById('mainInput').value = e.results[0][0].transcript; };
+        }
+        document.getElementById('voiceInputBtn').onclick = () => { recognition && recognition.start(); };
+
+        // --- Chat Logic ---
+        function setMode(btn, mode) {
+            document.querySelectorAll('.response-mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            config.mode = mode;
+        }
+
+        function appendMsg(sender, text, modeUsed = null) {
+            const id = 'msg-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = `flex flex-col ${sender === 'User' ? 'items-end' : 'items-start'} mb-4 cursor-pointer`;
+            div.onclick = () => {
+                div.classList.toggle('msg-selected');
+                div.classList.contains('msg-selected') ? selectedMessages.add(id) : selectedMessages.delete(id);
+            };
+
+            div.innerHTML = `
+                <div class="${sender === 'User' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-100'} p-3 px-4 rounded-2xl max-w-[85%] shadow-md">
+                    <p class="text-[8px] font-bold opacity-40 uppercase mb-1">${sender}</p>
+                    <div class="text-sm leading-relaxed">${text}</div>
+                    ${sender === 'AI' ? `
+                        <div class="mt-2 pt-2 border-t border-white/5 flex justify-between items-center text-[8px] uppercase font-bold text-gray-500">
+                            <span>MODE: ${modeUsed || config.mode}</span>
+                            <i class="fas fa-volume-up cursor-pointer hover:text-blue-400 text-xs" onclick="readText('${text.replace(/'/g, "\\'")}'); event.stopPropagation();"></i>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('chatWindow').appendChild(div);
+            document.getElementById('chatWindow').scrollTop = document.getElementById('chatWindow').scrollHeight;
+        }
+
+        async function handleChat() {
+            const input = document.getElementById('mainInput');
+            const prompt = input.value.trim();
+            if (!prompt) return;
+            if (!config.apiKey) { alert("Please set API Key in Settings!"); return; }
+
+            appendMsg('User', prompt);
+            input.value = '';
+
+            // Context from assigned docs
+            const assignedText = uploadedDocs.filter(d => d.assigned).map(d => d.text).join('\n\n');
+            
+            const loader = document.createElement('div');
+            loader.className = 'text-[10px] text-blue-400 italic animate-pulse ml-4 mb-4';
+            loader.innerText = 'AI is thinking...';
+            document.getElementById('chatWindow').appendChild(loader);
+
+            try {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": `Bearer ${config.apiKey}`, 
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": window.location.href,
+                        "X-Title": "AI Mind Pro"
+                    },
+                    body: JSON.stringify({
+                        "model": config.modelId,
+                        "messages": [
+                            { "role": "system", "content": `You are AI Mind Pro. Language: Match User Query (Gujarati/Hindi/English). Mode: ${config.mode}. If mode is DOC/BOTH, use this Context: ${assignedText}` },
+                            { "role": "user", "content": prompt }
+                        ]
+                    })
+                });
+                
+                const data = await response.json();
+                loader.remove();
+                
+                if (data.choices && data.choices[0]) {
+                    appendMsg('AI', data.choices[0].message.content, config.mode);
+                } else {
+                    throw new Error(data.error?.message || "Response error");
+                }
+            } catch (err) {
+                loader.remove();
+                appendMsg('Error', "Error: " + err.message);
+            }
+        }
+
+        function readText(txt) {
+            const speech = new SpeechSynthesisUtterance(txt);
+            speech.lang = /[અ-હ]/.test(txt) ? 'gu-IN' : (/[अ-ह]/.test(txt) ? 'hi-IN' : 'en-US');
+            window.speechSynthesis.speak(speech);
+        }
+
+        document.getElementById('apiToggleBtn').onclick = () => document.getElementById('apiSettingsPanel').classList.toggle('hidden');
         document.getElementById('saveConfig').onclick = () => {
             config.apiKey = document.getElementById('apiKeyInput').value.trim();
             config.modelId = document.getElementById('modelSelect').value;
             localStorage.setItem('or_key', config.apiKey);
             localStorage.setItem('or_model', config.modelId);
-            apiPanel.classList.add('hidden');
-            appendMsg('System', `કોન્ફિગરેશન સેવ થયું: ${config.modelId}`, 'text-blue-400');
+            document.getElementById('apiSettingsPanel').classList.add('hidden');
+            alert("Settings Saved Successfully!");
         };
 
-        function setMode(btn, mode) {
-            document.querySelectorAll('.response-mode-btn').forEach(b => {
-                b.classList.remove('active', 'bg-blue-600', 'text-white');
-                b.classList.add('text-gray-500');
-            });
-            btn.classList.add('active', 'bg-blue-600', 'text-white');
-            btn.classList.remove('text-gray-500');
-            config.mode = mode;
-            document.getElementById('currentModeDisplay').innerText = mode;
-        }
-
-        micBtn.onclick = () => {
-            isRecording = !isRecording;
-            micBtn.style.color = isRecording ? '#22c55e' : '#94a3b8';
-            if(isRecording) appendMsg('System', 'Listening... (તમે બોલી શકો છો)', 'text-green-500');
-        };
-
-        function appendMsg(sender, text, colorClass = 'text-gray-300') {
-            const msgId = 'msg-' + Date.now();
-            const div = document.createElement('div');
-            div.id = msgId;
-            div.className = `flex flex-col ${sender === 'User' ? 'items-end' : 'items-start'} cursor-pointer mb-4`;
-            
-            div.onclick = () => {
-                if(div.classList.contains('msg-selected')) {
-                    div.classList.remove('msg-selected');
-                    selectedMessages.delete(msgId);
-                } else {
-                    div.classList.add('msg-selected');
-                    selectedMessages.add(msgId);
-                }
-            };
-
-            const isAI = sender === 'AI';
-            div.innerHTML = `
-                <div class="${sender === 'User' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-200'} px-4 py-2 rounded-2xl max-w-[85%] text-sm shadow-md">
-                    <div class="flex justify-between items-center mb-1">
-                        <p class="text-[9px] font-bold opacity-50 uppercase">${sender}</p>
-                        ${isAI ? `<i class="fas fa-volume-up ml-3 cursor-pointer hover:text-blue-400" onclick="readAloud('${text.replace(/'/g, "\\'")}'); event.stopPropagation();"></i>` : ''}
-                    </div>
-                    <div class="${colorClass} whitespace-pre-wrap">${text}</div>
-                </div>
-            `;
-            chatWindow.appendChild(div);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }
-
-        async function handleChat() {
-            const prompt = mainInput.value.trim();
-            if(!prompt) return;
-            if(!config.apiKey) {
-                appendMsg('System', 'API Key બાકી છે!', 'text-red-400');
-                apiPanel.classList.remove('hidden');
-                return;
-            }
-
-            appendMsg('User', prompt);
-            mainInput.value = '';
-
-            const loader = document.createElement('div');
-            loader.className = 'text-xs text-blue-400 italic animate-pulse px-4';
-            loader.innerText = `Thinking (${config.mode})...`;
-            chatWindow.appendChild(loader);
-
-            try {
-                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${config.apiKey}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        "model": config.modelId,
-                        "messages": [{ 
-                            "role": "user", 
-                            "content": `You are an assistant. Answer in the same language as the user query (Gujarati, Hindi, or English). [MODE: ${config.mode}] Query: ${prompt}` 
-                        }]
-                    })
-                });
-                const data = await response.json();
-                chatWindow.removeChild(loader);
-                if(data.error) throw new Error(data.error.message);
-                appendMsg('AI', data.choices[0].message.content);
-            } catch (err) {
-                if(loader.parentNode) chatWindow.removeChild(loader);
-                appendMsg('Error', 'માફ કરશો, નેટવર્ક અથવા API માં સમસ્યા છે: ' + err.message, 'text-red-500');
-            }
-        }
-
-        deleteChatBtn.onclick = () => {
+        document.getElementById('deleteSelected').onclick = () => {
             selectedMessages.forEach(id => document.getElementById(id).remove());
             selectedMessages.clear();
         };
 
-        function readAloud(text) {
-            const u = new SpeechSynthesisUtterance(text);
-            // Detecting simple patterns to set voice
-            if(/[અ-હ]/.test(text)) u.lang = 'gu-IN';
-            else if(/[अ-ह]/.test(text)) u.lang = 'hi-IN';
-            else u.lang = 'en-US';
-            window.speechSynthesis.speak(u);
-        }
-
-        function exportChat(type) { alert('Exporting as ' + type); }
-        function openDocInstructions() { document.getElementById('instrModal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('instrModal').classList.add('hidden'); }
-        function deleteDoc(el) { el.closest('.group').remove(); }
-
-        sendBtn.onclick = handleChat;
-        mainInput.onkeypress = (e) => { if(e.key === 'Enter') handleChat(); };
+        document.getElementById('sendBtn').onclick = handleChat;
+        document.getElementById('mainInput').onkeydown = (e) => { if(e.key === 'Enter') handleChat(); };
     </script>
 </body>
 </html>
